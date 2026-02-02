@@ -95,10 +95,19 @@ async function loadTodayAttendance() {
         } else {
             data.forEach(item => {
                 attendedUserIds.add(item.user_id);
+                const time = item.created_at ? new Date(item.created_at.replace(' ', 'T') + 'Z').toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: 'Asia/Jakarta'
+                }) : '';
+
                 const li = document.createElement('li');
                 li.className = 'history-item';
                 li.innerHTML = `
-                    <span>${item.name}</span>
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="font-weight:600;">${item.name}</span>
+                        <span style="font-size:0.75rem; color:var(--text-secondary);">${time} WIB</span>
+                    </div>
                     <span class="badge ${item.status.toLowerCase()}">${item.status}</span>
                 `;
                 list.appendChild(li);
