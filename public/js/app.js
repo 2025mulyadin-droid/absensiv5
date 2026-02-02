@@ -95,18 +95,36 @@ async function loadTodayAttendance() {
         } else {
             data.forEach(item => {
                 attendedUserIds.add(item.user_id);
-                const time = item.created_at ? new Date(item.created_at.replace(' ', 'T') + 'Z').toLocaleTimeString('id-ID', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    timeZone: 'Asia/Jakarta'
-                }) : '';
+                let isLate = false;
+                let timeStr = '';
+                if (item.created_at) {
+                    const absDate = new Date(item.created_at.replace(' ', 'T') + 'Z');
+                    timeStr = absDate.toLocaleTimeString('id-ID', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                        timeZone: 'Asia/Jakarta'
+                    });
+
+                    // Cek jam keterlambatan (setelah jam 07:00)
+                    const hour = absDate.getUTCHours() + 7; // Convert to WIB, assumption DB stores UTC
+                    const adjustedHour = hour >= 24 ? hour - 24 : hour;
+                    const minutes = absDate.getUTCMinutes();
+
+                    if (adjustedHour > 7 || (adjustedHour === 7 && minutes > 0)) {
+                        isLate = true;
+                    }
+                }
 
                 const li = document.createElement('li');
                 li.className = 'history-item';
                 li.innerHTML = `
                     <div style="display:flex; flex-direction:column;">
                         <span style="font-weight:600;">${item.name}</span>
-                        <span style="font-size:0.75rem; color:var(--text-secondary);">${time} WIB</span>
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <span style="font-size:0.75rem; color:var(--text-secondary);">${timeStr} WIB</span>
+                            ${isLate ? '<span style="font-size:0.65rem; background:#fee2e2; color:#ef4444; padding:2px 6px; border-radius:4px; font-weight:700;">TERLAMBAT</span>' : ''}
+                        </div>
                     </div>
                     <span class="badge ${item.status.toLowerCase()}">${item.status}</span>
                 `;
