@@ -111,7 +111,7 @@ async function loadTodayAttendance() {
                     const adjustedHour = hour >= 24 ? hour - 24 : hour;
                     const minutes = absDate.getUTCMinutes();
 
-                    if (adjustedHour > 7 || (adjustedHour === 7 && minutes > 0)) {
+                    if (item.status === 'Hadir' && (adjustedHour > 7 || (adjustedHour === 7 && minutes > 0))) {
                         isLate = true;
                     }
                 }
